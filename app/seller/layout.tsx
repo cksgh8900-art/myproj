@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { isSeller } from "@/lib/auth/role";
+import { isSeller, getUserRole } from "@/lib/auth/role";
 import { SellerBottomNav } from "@/components/navigation/seller-bottom-nav";
 
 /**
@@ -19,17 +19,23 @@ export default async function SellerLayout({
   children: React.ReactNode;
 }) {
   // 추가 보안 레이어: SELLER 역할 확인
-  const seller = await isSeller();
+  const role = await getUserRole();
+  const seller = role === "SELLER";
+
+  console.log("🏪 SellerLayout - 역할 확인:", role, "isSeller:", seller);
 
   if (!seller) {
     // SELLER가 아니면 홈으로 리다이렉트
+    console.log("🚫 SellerLayout - SELLER가 아님, 홈으로 리다이렉트");
     redirect("/");
   }
 
+  console.log("✅ SellerLayout - SELLER 확인됨, 레이아웃 렌더링");
+
   return (
-    <div className="min-h-screen pb-16">
+    <div className="min-h-screen pb-20 bg-white">
       {/* 메인 컨텐츠 */}
-      <main className="min-h-[calc(100vh-80px-64px)]">{children}</main>
+      <div className="pb-4">{children}</div>
 
       {/* 하단 네비게이션 바 */}
       <SellerBottomNav />

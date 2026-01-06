@@ -1,8 +1,8 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 /**
  * 역할 리다이렉트 프로바이더
@@ -14,34 +14,64 @@ import { useEffect } from "react";
  */
 export function RoleRedirectProvider({ children }: { children: React.ReactNode }) {
   const { isLoaded, user } = useUser();
-  const router = useRouter();
+  const pathname = usePathname();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // 로딩 중이거나 사용자가 없으면 무시
-    if (!isLoaded || !user) {
+    // 이미 리다이렉트 했으면 무시
+    if (hasRedirected.current) {
       return;
     }
 
-    // 현재 경로 확인
-    const currentPath = window.location.pathname;
+    console.group("🔍 RoleRedirectProvider 체크");
+    console.log("isLoaded:", isLoaded);
+    console.log("user:", user ? user.id : null);
+    console.log("pathname:", pathname);
 
-    // onboarding 페이지나 로그인/회원가입 페이지는 리다이렉트하지 않음
-    if (
-      currentPath.startsWith("/onboarding") ||
-      currentPath.startsWith("/sign-in") ||
-      currentPath.startsWith("/sign-up")
-    ) {
+    // 로딩 중이거나 사용자가 없으면 무시
+    if (!isLoaded) {
+      console.log("⏳ 로딩 중...");
+      console.groupEnd();
+      return;
+    }
+
+    if (!user) {
+      console.log("👤 로그인되지 않은 사용자");
+      console.groupEnd();
+      return;
+    }
+
+    // 리다이렉트 제외 경로
+    const excludedPaths = [
+      "/onboarding",
+      "/sign-in",
+      "/sign-up",
+      "/api/",
+    ];
+
+    const isExcludedPath = excludedPaths.some((path) => pathname.startsWith(path));
+    if (isExcludedPath) {
+      console.log("🚫 리다이렉트 제외 경로:", pathname);
+      console.groupEnd();
       return;
     }
 
     // publicMetadata에서 role 확인
     const role = user.publicMetadata?.role as string | undefined;
+    console.log("👤 사용자 역할:", role);
 
     // 역할이 설정되지 않았으면 onboarding으로 리다이렉트
     if (!role || (role !== "BUYER" && role !== "SELLER")) {
-      router.push("/onboarding");
+      console.log("🚀 역할 미설정 -> /onboarding 으로 리다이렉트");
+      console.groupEnd();
+      hasRedirected.current = true;
+      // 하드 리프레시로 이동 (서버 측에서 세션 확인)
+      window.location.href = "/onboarding";
+    } else {
+      console.log("✅ 역할 설정됨:", role);
+      console.groupEnd();
     }
-  }, [isLoaded, user, router]);
+  }, [isLoaded, user, pathname]);
 
   return <>{children}</>;
 }

@@ -140,16 +140,16 @@
 
 ### 2-1. 사장님 전용 레이아웃
 
-- [x] **폴더 구조 생성:** `app/(seller)/layout.tsx`
+- [x] **폴더 구조 생성:** `app/seller/layout.tsx`
 - [x] **사장님용 네비게이션 바:** 하단에 [내 상품 관리], [등록하기], [설정] 메뉴 배치.
 
 ---
 
 **추가 개발 사항**
 
-- [x] **Route Group 디렉토리 구조 생성:**
-  - `app/(seller)/` 디렉토리 생성
-  - Next.js Route Groups 기능 사용 (URL에 포함되지 않음)
+- [x] **사장님 경로 디렉토리 구조 생성:**
+  - `app/seller/` 디렉토리 생성
+  - `/seller/*` URL로 접근 가능
 - [x] **사장님용 하단 네비게이션 바 구현:**
   - `components/navigation/seller-bottom-nav.tsx`: 하단 고정 네비게이션 바
   - Mobile-First 디자인 (max-width: 430px)
@@ -157,32 +157,97 @@
   - 아이콘 + 텍스트 레이블 (Package, Plus, Settings)
   - `usePathname` 훅으로 현재 경로 확인
 - [x] **사장님 전용 레이아웃 구현:**
-  - `app/(seller)/layout.tsx`: 사장님 전용 레이아웃
+  - `app/seller/layout.tsx`: 사장님 전용 레이아웃
   - `isSeller()` 함수로 추가 보안 레이어 (이중 보안)
   - 하단 네비게이션 바 통합
   - 하단 네비게이션 바를 위한 padding-bottom 적용
 - [x] **임시 페이지 구현:**
-  - `app/(seller)/page.tsx`: `/seller/dashboard`로 리다이렉트
-  - `app/(seller)/dashboard/page.tsx`: 내 상품 관리 임시 페이지
-  - `app/(seller)/upload/page.tsx`: 상품 등록 임시 페이지
-  - `app/(seller)/settings/page.tsx`: 설정 임시 페이지
+  - `app/seller/page.tsx`: `/seller/dashboard`로 리다이렉트
+  - `app/seller/dashboard/page.tsx`: 내 상품 관리 임시 페이지
+  - `app/seller/upload/page.tsx`: 상품 등록 임시 페이지
+  - `app/seller/settings/page.tsx`: 설정 임시 페이지
 
 ### 2-2. 상품 등록 기능
 
-- [ ] **가게 정보 등록:** (최초 1회) 가게 이름, 위치 입력받아 `stores` 테이블 저장.
-- [ ] **상품 등록 페이지 (`/seller/upload`):**
+- [x] **가게 정보 등록:** (최초 1회) 가게 이름, 위치 입력받아 `stores` 테이블 저장.
+- [x] **상품 등록 페이지 (`/seller/upload`):**
   - 파일 업로드 UI (`input type="file"`) 구현.
   - 메뉴명, 정가, 할인가, 픽업 시간 입력 폼.
-- [ ] **이미지 업로드 로직:**
+- [x] **이미지 업로드 로직:**
   - Supabase Storage에 `products` 버킷 생성 및 정책(Policy) 설정 (누구나 읽기 가능, 인증된 유저만 쓰기 가능).
   - 이미지 업로드 -> URL 획득 -> `products` 테이블에 데이터 저장.
 
+---
+
+**추가 개발 사항**
+
+- [x] **Supabase Storage products 버킷 생성:**
+  - `supabase/migrations/20260106150000_create_products_storage.sql` 생성
+  - 공개 버킷 설정 (누구나 읽기 가능)
+  - 인증된 사용자만 업로드/삭제/업데이트 가능
+  - 이미지 파일만 허용 (JPEG, PNG, WebP)
+  - 파일 크기 제한: 5MB
+- [x] **가게 정보 조회 및 생성 Server Action:**
+  - `app/(seller)/actions.ts`: `getStore()`, `createStore()` 함수 구현
+  - 가게 정보 조회 및 생성 로직
+  - 에러 처리 및 검증
+- [x] **이미지 업로드 유틸리티 함수:**
+  - `lib/storage/upload-product-image.ts`: 이미지 업로드 및 삭제 함수
+  - 파일 검증 (크기, 형식)
+  - Supabase Storage 업로드 및 Public URL 반환
+- [x] **상품 등록 폼 Zod 스키마:**
+  - `app/(seller)/upload/schema.ts`: 폼 검증 스키마 정의
+  - 메뉴명, 정가, 할인가, 픽업 시간, 바로 섭취 여부 검증
+  - 할인가가 정가보다 작은지 확인
+  - 픽업 마감 시간이 현재 시간보다 미래인지 확인
+- [x] **상품 등록 폼 UI 구현:**
+  - `app/(seller)/upload/page.tsx`: react-hook-form과 shadcn/ui Form 컴포넌트 사용
+  - 이미지 업로드 및 미리보기 기능
+  - 모든 입력 필드 구현 (메뉴명, 정가, 할인가, 바로 섭취 여부, 픽업 마감 시간)
+  - Mobile-First 디자인
+- [x] **상품 등록 Server Action:**
+  - `app/(seller)/upload/actions.ts`: `createProduct()` 함수 구현
+  - 가게 정보 확인
+  - 이미지 업로드 통합
+  - 상품 데이터를 `products` 테이블에 저장
+  - 성공 시 대시보드로 리다이렉트
+- [x] **가게 정보 등록 플로우:**
+  - `components/product/store-setup-form.tsx`: 가게 정보 등록 폼 컴포넌트
+  - 상품 등록 페이지에서 가게 정보 없을 때 자동으로 가게 정보 등록 폼 표시
+  - 가게 정보 등록 후 상품 등록 폼으로 전환
+
 ### 2-3. 내 상품 관리 (Dashboard)
 
-- [ ] **상품 리스트 조회:** `store_id`가 내 가게인 상품만 `SELECT`.
-- [ ] **상태 변경 기능:** [판매 완료] 버튼 클릭 시 `status`를 `SOLD`로 변경 (`UPDATE`).
+- [x] **상품 리스트 조회:** `store_id`가 내 가게인 상품만 `SELECT`.
+- [x] **상태 변경 기능:** [판매 완료] 버튼 클릭 시 `status`를 `SOLD`로 변경 (`UPDATE`).
 
 ---
+
+**추가 개발 사항**
+
+- [x] **사장님 상품 조회 Server Action 구현:**
+  - `app/seller/actions.ts`: `ProductData` 타입 정의
+  - `getMyProducts()` 추가 (내 가게(store_id) 기준 상품 리스트 조회)
+- [x] **상품 상태 변경 Server Action 구현:**
+  - `app/seller/actions.ts`: `updateProductStatus()` 추가
+  - 현재 로그인한 사장님의 가게에 속한 상품만 `SOLD`로 업데이트
+  - `/seller/dashboard` 경로 revalidate 처리
+- [x] **Dashboard 페이지 실제 기능 구현:**
+  - `app/seller/dashboard/page.tsx`: Server Component로 변환
+  - 가게 정보 유무에 따른 분기 처리
+    - 가게 정보 없음: 가게 등록 안내 + `/seller/upload` 버튼
+    - 가게 정보 있음: 상품 리스트 + 개수 표시
+- [x] **상품 카드 컴포넌트 구현:**
+  - `components/product/product-card.tsx`
+  - 이미지, 상품명, 정가/할인가, 할인율, 상태 뱃지, 픽업 마감 시간, 바로 섭취 뱃지 표시
+  - 카드 하단에 [판매 완료] 버튼 배치
+- [x] **판매 완료 버튼 컴포넌트 구현:**
+  - `components/product/mark-as-sold-button.tsx`
+  - 클라이언트 컴포넌트에서 `updateProductStatus` Server Action 호출
+  - 로딩 상태와 비활성화 상태 처리
+- [x] **빈 상태 컴포넌트 구현:**
+  - `components/product/empty-products.tsx`
+  - 등록된 상품이 없을 때 안내 문구 및 `/seller/upload` 버튼 표시
 
 ## 🛠 Phase 3: 사용자(학생) 기능 개발 (Demand Side)
 
@@ -243,3 +308,54 @@
 
 > "예약 버튼을 누르면 실행될 Server Action을 만들어줘.
 > 동시에 여러 사람이 누를 수 있으니까, 반드시 DB에서 현재 상태가 'AVAILABLE'인지 먼저 확인하고 업데이트하는 로직이 필요해."
+
+---
+
+## 🐛 버그 수정 내역 (2026-01-06)
+
+> **문제:** 역할 선택 후 `/seller` 페이지로 이동해도 홈으로 리다이렉트되고, 하단 네비게이션 바가 표시되지 않음
+
+### 수정된 파일들:
+
+- [x] **Route Group 폴더명 변경:**
+
+  - `app/(seller)/` → `app/seller/`로 변경
+  - Next.js Route Groups `(seller)`는 URL에 포함되지 않아 `/seller` 경로가 404 반환
+  - 괄호 없이 `seller` 폴더로 변경하여 `/seller/*` URL 정상 작동
+
+- [x] **역할 업데이트 Server Action 수정 (`app/onboarding/actions.ts`):**
+
+  - `redirect()` 대신 리다이렉트 경로를 반환하도록 변경
+  - 클라이언트에서 세션 갱신 후 하드 리프레시 수행
+  - Clerk `publicMetadata` 업데이트 후 세션 토큰 갱신 필요
+
+- [x] **Onboarding 페이지 클라이언트 컴포넌트로 변경 (`app/onboarding/page.tsx`):**
+
+  - 서버 컴포넌트 → 클라이언트 컴포넌트로 변경
+  - `useClerk().session.reload()`로 세션 토큰 갱신
+  - `window.location.href`로 하드 리프레시 수행
+
+- [x] **RoleRedirectProvider 수정 (`components/providers/role-redirect-provider.tsx`):**
+
+  - `router.push()` → `window.location.href`로 변경 (하드 리프레시)
+  - 중복 리다이렉트 방지를 위한 `useRef` 추가
+
+- [x] **Middleware RBAC 로직 개선 (`middleware.ts`):**
+
+  - `sessionClaims` 대신 직접 Clerk API 호출
+  - `sessionClaims`는 JWT 토큰에서 읽어 업데이트가 늦게 반영됨
+  - `clerkClient().users.getUser()`로 최신 역할 확인
+
+- [x] **Import 경로 수정 (`components/product/store-setup-form.tsx`):**
+  - `@/app/(seller)/actions` → `@/app/seller/actions`로 변경
+
+### 근본 원인:
+
+1. **Route Group 오해:** Next.js Route Groups `(folder)`는 URL에 포함되지 않음
+2. **세션 토큰 갱신:** Clerk `publicMetadata` 업데이트 후 JWT 토큰이 즉시 갱신되지 않아 서버 측에서 이전 역할이 반환됨
+
+### 해결 방법:
+
+1. Route Group을 일반 폴더로 변경하여 `/seller/*` URL 정상 작동
+2. 역할 업데이트 후 클라이언트에서 세션 갱신 및 하드 리프레시 수행
+3. 미들웨어에서 직접 Clerk API 호출하여 최신 역할 확인

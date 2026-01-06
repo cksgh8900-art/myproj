@@ -23,7 +23,7 @@ import { auth } from "@clerk/nextjs/server";
  *     throw error;
  *   }
  *
- *   return <div>{/* render data */}</div>;
+ *   return <div>{/* render data *\/}</div>;
  * }
  * ```
  */

@@ -38,8 +38,8 @@ export function SellerBottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
-      <div className="max-w-[430px] mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border shadow-lg">
+      <div className="max-w-[430px] mx-auto bg-background">
         <div className="flex items-center justify-around h-16 px-4">
           {navItems.map((item) => {
             const Icon = item.icon;
