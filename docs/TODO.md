@@ -94,13 +94,43 @@
 
 ### 1-3. [핵심] 역할 기반 보안 (RBAC Middleware)
 
-- [ ] **역할 선택 페이지 구현 (`/onboarding`):**
+- [x] **역할 선택 페이지 구현 (`/onboarding`):**
   - 회원가입 직후 리다이렉트 될 페이지.
   - "사장님(Seller)" vs "학생(Buyer)" 선택 버튼.
   - 선택 시 Clerk `publicMetadata` 업데이트 및 Supabase `profiles` 테이블에 Insert.
-- [ ] **미들웨어(`middleware.ts`) 작성:**
+- [x] **미들웨어(`middleware.ts`) 작성:**
   - Clerk 미들웨어를 사용하여 경로 보호.
   - **로직:** `/seller`로 시작하는 주소에 접근 시, 유저의 metadata가 `seller`가 아니면 메인 화면으로 강제 이동(Redirect).
+
+---
+
+**추가 개발 사항**
+
+- [x] **역할 업데이트 Server Action 구현:**
+  - `app/onboarding/actions.ts`: 역할 업데이트 Server Action
+  - Clerk `publicMetadata.role` 업데이트
+  - Supabase `profiles.role` 업데이트
+  - 트랜잭션 처리 및 에러 처리
+  - 역할에 따른 자동 리다이렉트 (SELLER → `/seller`, BUYER → `/`)
+- [x] **역할 선택 페이지 UI 구현:**
+  - `app/onboarding/page.tsx`: Mobile-First 디자인
+  - 큰 선택 버튼 2개 (사장님 / 학생)
+  - 아이콘 및 설명 텍스트 포함
+  - Server Action 호출 및 리다이렉트 처리
+- [x] **Middleware RBAC 로직 구현:**
+  - `middleware.ts`: `/seller/*` 경로 보호
+  - `createRouteMatcher`를 사용한 경로 매칭
+  - `sessionClaims.publicMetadata.role` 확인
+  - SELLER가 아니면 `/`로 리다이렉트
+  - `/onboarding`, `/api/*` 경로는 보호하지 않음
+- [x] **회원가입 후 자동 리다이렉트:**
+  - `components/providers/role-redirect-provider.tsx`: 역할 리다이렉트 프로바이더
+  - 역할이 설정되지 않은 사용자를 `/onboarding`으로 자동 리다이렉트
+  - `app/layout.tsx`에 프로바이더 추가
+- [x] **역할 확인 유틸리티 함수:**
+  - `lib/auth/role.ts`: 역할 확인 유틸리티 함수
+  - `getUserRole()`: 현재 사용자의 역할 반환
+  - `isSeller()`, `isBuyer()`, `hasRole()`: 역할 확인 함수
 
 ---
 
