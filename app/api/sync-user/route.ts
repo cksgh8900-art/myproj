@@ -3,10 +3,13 @@ import { NextResponse } from "next/server";
 import { getServiceRoleClient } from "@/lib/supabase/service-role";
 
 /**
- * Clerk 사용자를 Supabase users 테이블에 동기화하는 API
+ * Clerk 사용자를 Supabase profiles 테이블에 동기화하는 API
  *
  * 클라이언트에서 로그인 후 이 API를 호출하여 사용자 정보를 Supabase에 저장합니다.
  * 이미 존재하는 경우 업데이트하고, 없으면 새로 생성합니다.
+ * 
+ * PRD 스키마에 따라 profiles 테이블을 사용하며, role은 기본값 'BUYER'로 설정됩니다.
+ * 나중에 onboarding 페이지에서 role을 'SELLER'로 업데이트할 수 있습니다.
  */
 export async function POST() {
   try {
@@ -25,15 +28,19 @@ export async function POST() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Supabase에 사용자 정보 동기화
+    // Supabase에 사용자 정보 동기화 (profiles 테이블 사용)
     const supabase = getServiceRoleClient();
 
+    // Clerk의 publicMetadata에서 role 확인 (있으면 사용, 없으면 기본값 'BUYER')
+    const role = (clerkUser.publicMetadata?.role as string) || "BUYER";
+
     const { data, error } = await supabase
-      .from("users")
+      .from("profiles")
       .upsert(
         {
           clerk_id: clerkUser.id,
-          name:
+          role: role === "SELLER" ? "SELLER" : "BUYER", // ENUM 타입에 맞게 변환
+          nickname:
             clerkUser.fullName ||
             clerkUser.username ||
             clerkUser.emailAddresses[0]?.emailAddress ||

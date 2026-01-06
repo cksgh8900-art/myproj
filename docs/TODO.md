@@ -63,11 +63,34 @@
 
 ### 1-2. 인증(Auth) 및 데이터베이스 연결
 
-- [ ] **Clerk & Supabase 연동:**
+- [x] **Clerk & Supabase 연동:**
   - Clerk 대시보드에서 애플리케이션 생성.
   - Supabase 프로젝트 생성 및 `SQL Editor`에서 테이블(`profiles`, `stores` 등) 생성.
   - `.env.local` 파일에 API Key 등 환경변수 저장.
-- [ ] **ClerkProvider 설정:** `app/layout.tsx` 전체 감싸기.
+- [x] **ClerkProvider 설정:** `app/layout.tsx` 전체 감싸기.
+
+---
+
+**추가 개발 사항**
+
+- [x] **데이터베이스 스키마 마이그레이션:**
+  - `supabase/migrations/20260106141956_create_lastchance_schema.sql` 생성
+  - ENUM 타입 정의 (user_role, product_status, order_status)
+  - 테이블 생성 (profiles, stores, products, orders)
+  - 외래 키 제약 조건 및 인덱스 생성
+  - `reserve_product` 함수 구현 (트랜잭션 처리)
+  - RLS 정책 설정 (개발용 - 모든 접근 허용)
+- [x] **사용자 동기화 로직 업데이트:**
+  - `app/api/sync-user/route.ts`: `users` 테이블 → `profiles` 테이블로 변경
+  - Clerk `publicMetadata.role` 지원 추가
+  - 필드 매핑 업데이트 (name → nickname, role 기본값 'BUYER')
+- [x] **환경 변수 문서화:**
+  - `.env.example` 파일 생성 (Clerk 및 Supabase 환경 변수 예시)
+  - `docs/environment-setup.md` 가이드 문서 작성
+- [x] **Clerk-Supabase 통합 상태 확인:**
+  - `docs/clerk-supabase-integration-status.md` 문서 작성
+  - 통합 아키텍처 다이어그램 및 체크리스트 제공
+  - 테스트 방법 및 문제 해결 가이드 포함
 
 ### 1-3. [핵심] 역할 기반 보안 (RBAC Middleware)
 
