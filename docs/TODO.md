@@ -140,8 +140,32 @@
 
 ### 2-1. 사장님 전용 레이아웃
 
-- [ ] **폴더 구조 생성:** `app/(seller)/layout.tsx`
-- [ ] **사장님용 네비게이션 바:** 하단에 [내 상품 관리], [등록하기], [설정] 메뉴 배치.
+- [x] **폴더 구조 생성:** `app/(seller)/layout.tsx`
+- [x] **사장님용 네비게이션 바:** 하단에 [내 상품 관리], [등록하기], [설정] 메뉴 배치.
+
+---
+
+**추가 개발 사항**
+
+- [x] **Route Group 디렉토리 구조 생성:**
+  - `app/(seller)/` 디렉토리 생성
+  - Next.js Route Groups 기능 사용 (URL에 포함되지 않음)
+- [x] **사장님용 하단 네비게이션 바 구현:**
+  - `components/navigation/seller-bottom-nav.tsx`: 하단 고정 네비게이션 바
+  - Mobile-First 디자인 (max-width: 430px)
+  - 현재 활성화된 메뉴 강조 표시
+  - 아이콘 + 텍스트 레이블 (Package, Plus, Settings)
+  - `usePathname` 훅으로 현재 경로 확인
+- [x] **사장님 전용 레이아웃 구현:**
+  - `app/(seller)/layout.tsx`: 사장님 전용 레이아웃
+  - `isSeller()` 함수로 추가 보안 레이어 (이중 보안)
+  - 하단 네비게이션 바 통합
+  - 하단 네비게이션 바를 위한 padding-bottom 적용
+- [x] **임시 페이지 구현:**
+  - `app/(seller)/page.tsx`: `/seller/dashboard`로 리다이렉트
+  - `app/(seller)/dashboard/page.tsx`: 내 상품 관리 임시 페이지
+  - `app/(seller)/upload/page.tsx`: 상품 등록 임시 페이지
+  - `app/(seller)/settings/page.tsx`: 설정 임시 페이지
 
 ### 2-2. 상품 등록 기능
 
