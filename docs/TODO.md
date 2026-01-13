@@ -255,8 +255,25 @@
 
 ### 3-1. 사용자 전용 레이아웃
 
-- [ ] **폴더 구조 생성:** `app/(buyer)/layout.tsx`
-- [ ] **사용자용 네비게이션 바:** 하단에 [홈], [내 예약], [마이페이지] 메뉴 배치.
+- [x] **폴더 구조 생성:** `app/buyer/layout.tsx`
+- [x] **사용자용 네비게이션 바:** 하단에 [홈], [내 예약], [마이페이지] 메뉴 배치.
+
+---
+
+**추가 개발 사항**
+
+- [x] **Buyer 하단 네비게이션 컴포넌트 구현:**
+  - `components/navigation/buyer-bottom-nav.tsx`
+  - [홈](`/buyer`), [내 예약](`/buyer/reservations`), [마이페이지](`/buyer/me`) 메뉴 구성
+  - `usePathname`를 사용한 활성 메뉴 강조, Mobile-First 하단 고정 레이아웃
+- [x] **사용자 전용 레이아웃 구현:**
+  - `app/buyer/layout.tsx`
+  - 하단에 `BuyerBottomNav` 포함, 본문 영역에 `children` 렌더링
+  - 하단 네비게이션 높이만큼 `pb-20` 패딩 적용
+- [x] **Buyer 기본 라우트 생성:**
+  - `app/(buyer)/page.tsx`: "학생용 메인 피드 (추후 구현 예정)" 안내
+  - `app/(buyer)/reservations/page.tsx`: "내 예약 내역 (추후 구현 예정)" 안내
+  - `app/(buyer)/me/page.tsx`: "마이페이지 (추후 구현 예정)" 안내
 
 ### 3-2. 메인 피드 (Feed)
 
