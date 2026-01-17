@@ -377,8 +377,47 @@
 
 ### 3-4. 내 예약 확인
 
-- [ ] **예약 내역 리스트:** `orders` 테이블에서 내 아이디로 조회.
-- [ ] **상태 표시:** 예약중(초록색) / 픽업완료(회색) / 취소됨(빨간색) 뱃지 표시.
+- [x] **예약 내역 리스트:** `orders` 테이블에서 내 아이디로 조회.
+- [x] **상태 표시:** 예약중(초록색) / 픽업완료(회색) / 취소됨(빨간색) 뱃지 표시.
+
+---
+
+**추가 개발 사항**
+
+- [x] **예약 내역 조회 Server Action 구현:**
+  - `app/buyer/actions.ts`: `getMyOrders()` 함수 구현
+  - Clerk 인증 확인 (`auth().userId`)
+  - orders 테이블에서 `buyer_id`로 조회
+  - products 테이블과 조인하여 상품 정보 포함
+  - stores 테이블과 조인하여 가게 정보 포함 (중첩 조인)
+  - 최신순 정렬 (`created_at DESC`)
+  - 반환 타입: `OrderData[]` (order 정보 + product 정보 + store 정보)
+  - 타입 정의: `OrderData` 타입 추가
+- [x] **예약 내역 카드 컴포넌트 구현:**
+  - `components/product/order-card.tsx`: 예약 내역 카드 컴포넌트
+  - 상품 이미지, 상품명, 가격 정보 (할인가)
+  - 가게 정보 (가게명)
+  - 예약 날짜 표시
+  - 픽업 마감 시간 표시
+  - 상태 뱃지 표시:
+    - 예약중 (RESERVED): 초록색 뱃지 (`bg-emerald-100 text-emerald-700`)
+    - 픽업완료 (COMPLETED): 회색 뱃지 (`bg-gray-200 text-gray-600`)
+    - 취소됨 (CANCELED): 빨간색 뱃지 (`bg-red-100 text-red-700`)
+  - 상품 클릭 시 `/buyer/product/[id]` 경로로 이동 (Link)
+  - Mobile-First 디자인
+- [x] **빈 상태 컴포넌트 구현:**
+  - `components/product/empty-orders.tsx`: 예약 내역 빈 상태 컴포넌트
+  - "아직 예약한 상품이 없습니다" 메시지 표시
+  - "마감 할인 상품 둘러보기" 버튼으로 메인 피드로 이동 유도
+  - Mobile-First 디자인
+- [x] **예약 내역 페이지 구현:**
+  - `app/buyer/reservations/page.tsx`: 예약 내역 페이지 (Server Component)
+  - `getMyOrders()` Server Action 호출
+  - 예약 내역 리스트 렌더링 (`OrderCard` 컴포넌트)
+  - 빈 상태 처리 (`EmptyOrders` 컴포넌트)
+  - 로딩 상태 처리 (Suspense 사용)
+  - 페이지 제목 및 설명
+  - Mobile-First 디자인
 
 ---
 

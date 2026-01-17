@@ -53,6 +53,37 @@ export type ReserveProductResult =
   | { success: false; message: string };
 
 /**
+ * 예약 내역 정보 타입 (order + product + store)
+ */
+export type OrderData = {
+  // Order 정보
+  id: string;
+  buyer_id: string;
+  product_id: string;
+  status: "RESERVED" | "COMPLETED" | "CANCELED";
+  created_at: string;
+
+  // Product 정보 (조인)
+  product: {
+    id: string;
+    name: string;
+    original_price: number;
+    discount_price: number;
+    image_url: string | null;
+    is_instant: boolean;
+    pickup_deadline: string;
+  };
+
+  // Store 정보 (조인)
+  store: {
+    id: string;
+    name: string;
+    address: string | null;
+    phone: string | null;
+  };
+};
+
+/**
  * 판매 가능한 상품 리스트를 조회합니다.
  *
  * @param filter - 필터 옵션 (선택)
@@ -234,5 +265,100 @@ export async function reserveProduct(
       success: false,
       message: "시스템 오류가 발생했습니다.",
     };
+  }
+}
+
+/**
+ * 현재 사용자의 예약 내역을 조회합니다.
+ *
+ * @returns 예약 내역 리스트 (order + product + store 정보 포함)
+ */
+export async function getMyOrders(): Promise<OrderData[]> {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return [];
+    }
+
+    const supabase = await createClient();
+
+    // orders 테이블에서 products와 stores를 조인하여 조회
+    const { data, error } = await supabase
+      .from("orders")
+      .select(
+        `
+        *,
+        products (
+          id,
+          name,
+          original_price,
+          discount_price,
+          image_url,
+          is_instant,
+          pickup_deadline,
+          stores (
+            id,
+            name,
+            address,
+            phone
+          )
+        )
+      `
+      )
+      .eq("buyer_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching orders:", error);
+      return [];
+    }
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    // 타입 변환 (products와 stores가 배열로 반환될 수 있으므로 처리)
+    return data.map((order: any) => {
+      const product = Array.isArray(order.products)
+        ? order.products[0]
+        : order.products;
+      const store = product?.stores
+        ? Array.isArray(product.stores)
+          ? product.stores[0]
+          : product.stores
+        : null;
+
+      if (!product || !store) {
+        console.error("Product or store not found for order:", order.id);
+        return null;
+      }
+
+      return {
+        id: order.id,
+        buyer_id: order.buyer_id,
+        product_id: order.product_id,
+        status: order.status,
+        created_at: order.created_at,
+        product: {
+          id: product.id,
+          name: product.name,
+          original_price: product.original_price,
+          discount_price: product.discount_price,
+          image_url: product.image_url,
+          is_instant: product.is_instant,
+          pickup_deadline: product.pickup_deadline,
+        },
+        store: {
+          id: store.id,
+          name: store.name,
+          address: store.address,
+          phone: store.phone,
+        },
+      } as OrderData;
+    }).filter((order): order is OrderData => order !== null);
+  } catch (error) {
+    console.error("Error in getMyOrders:", error);
+    return [];
   }
 }
