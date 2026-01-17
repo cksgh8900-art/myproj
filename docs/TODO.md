@@ -325,11 +325,55 @@
 
 ### 3-3. 예약 시스템 (Reservation)
 
-- [ ] **상세 페이지:** 상품 클릭 시 `/product/[id]` 로 이동.
-- [ ] **예약 액션 (Server Action):**
+- [x] **상세 페이지:** 상품 클릭 시 `/buyer/product/[id]` 로 이동.
+- [x] **예약 액션 (Server Action):**
   - [예약하기] 버튼 클릭.
   - **트랜잭션:** (1) 재고 확인 -> (2) `orders` 테이블 Insert -> (3) `products` 상태 `RESERVED`로 변경.
   - 성공 시 "예약 성공" 팝업 띄우기.
+
+---
+
+**추가 개발 사항**
+
+- [x] **상품 상세 조회 Server Action 구현:**
+  - `app/buyer/actions.ts`: `getProductById(productId)` 함수 구현
+  - products 테이블과 stores 테이블 조인하여 가게 정보 포함
+  - 반환 타입: `ProductDetailData` (ProductData + store 정보)
+  - 에러 처리 (상품 없을 때 null 반환)
+- [x] **예약 Server Action 구현:**
+  - `app/buyer/actions.ts`: `reserveProduct(productId)` 함수 구현
+  - Clerk 인증 확인 (`auth().userId`)
+  - Supabase RPC 호출: `supabase.rpc('reserve_product', { p_product_id, p_buyer_id })`
+  - 반환 타입: `ReserveProductResult` (`{ success: boolean; message?: string; order_id?: string }`)
+  - 에러 처리 및 검증
+  - 경로 revalidate 처리 (`revalidatePath('/buyer')`, `revalidatePath('/buyer/product/[id]')`)
+- [x] **예약 버튼 컴포넌트 구현:**
+  - `components/product/reserve-button.tsx`: 예약 버튼 클라이언트 컴포넌트
+  - `reserveProduct` Server Action 호출
+  - 로딩 상태 관리 (버튼 비활성화, 로딩 스피너)
+  - 예약 성공 시 성공 팝업 표시
+  - 예약 실패 시 에러 메시지 표시
+- [x] **예약 성공 팝업 구현:**
+  - `components/product/reservation-success-dialog.tsx`: 예약 성공 다이얼로그
+  - shadcn/ui Dialog 컴포넌트 사용
+  - 예약 성공 메시지 표시
+  - 주문 ID 표시 (선택)
+  - "내 예약 확인하기" 버튼 클릭 시 `/buyer/reservations`로 리다이렉트
+  - Mobile-First 디자인
+- [x] **상품 상세 페이지 구현:**
+  - `app/buyer/product/[id]/page.tsx`: 상품 상세 페이지 (Server Component)
+  - Next.js 15 async `params` 패턴 사용
+  - 상품 정보 표시:
+    - 이미지 (큰 사이즈, 전체 너비)
+    - 상품명
+    - 가격 정보 (정가/할인가, 할인율 배지)
+    - 바로 섭취 뱃지
+    - 픽업 마감 시간
+    - 가게 정보 (가게명, 주소, 전화번호)
+  - 상품 상태 표시 (AVAILABLE/RESERVED/SOLD)
+  - 예약 버튼 (하단 고정, 상태가 AVAILABLE일 때만 활성화)
+  - 빈 상태 처리 (상품 없을 때 `notFound()` 호출)
+  - Mobile-First 디자인
 
 ### 3-4. 내 예약 확인
 
