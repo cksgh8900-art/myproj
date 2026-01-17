@@ -277,9 +277,51 @@
 
 ### 3-2. 메인 피드 (Feed)
 
-- [ ] **상품 리스트 조회:** `status`가 `AVAILABLE`인 모든 상품 조회.
-- [ ] **필터 UI 구현:** 상단 탭 (전체 / 😋바로섭취 / 🍳조리용 / 💸만원이하) 클릭 시 쿼리 조건 변경.
-- [ ] **카드 UI 디자인:** 사진, 할인율(빨간색), 가격 표시.
+- [x] **상품 리스트 조회:** `status`가 `AVAILABLE`인 모든 상품 조회.
+- [x] **필터 UI 구현:** 상단 탭 (전체 / 😋바로섭취 / 🍳조리용 / 💸만원이하) 클릭 시 쿼리 조건 변경.
+- [x] **카드 UI 디자인:** 사진, 할인율(빨간색), 가격 표시.
+
+---
+
+**추가 개발 사항**
+
+- [x] **Buyer 상품 조회 Server Action 구현:**
+  - `app/buyer/actions.ts`: `getAvailableProducts()` 함수 구현
+  - `status = 'AVAILABLE'`인 모든 상품 조회
+  - 필터 옵션 지원:
+    - `is_instant: true` - 바로 섭취 필터 (😋바로섭취)
+    - `is_instant: false` - 조리용 필터 (🍳조리용)
+    - `max_price: 10000` - 만원 이하 필터 (💸만원이하)
+  - `ProductData` 타입 정의 (seller와 동일하게 재사용)
+  - 픽업 마감 시간이 현재 시간보다 미래인 상품만 조회
+  - 최신순 정렬 (`created_at DESC`)
+- [x] **필터 탭 컴포넌트 구현:**
+  - `components/product/feed-filter-tabs.tsx`: 필터 탭 UI 컴포넌트
+  - 클라이언트 컴포넌트로 구현
+  - 필터 탭 구성: [전체], [😋바로섭취], [🍳조리용], [💸만원이하]
+  - 활성화된 필터 강조 표시
+  - 필터 변경 시 URL 쿼리 파라미터 업데이트 또는 상태 관리
+  - Mobile-First 디자인 (가로 스크롤 가능한 탭)
+- [x] **피드용 상품 카드 컴포넌트 구현:**
+  - `components/product/feed-product-card.tsx`: 피드용 상품 카드
+  - 사진 (이미지 없을 때 플레이스홀더)
+  - 할인율 표시 (빨간색 강조, 큰 폰트)
+  - 가격 표시 (할인가 / 정가 취소선)
+  - 바로 섭취 뱃지 표시 (`is_instant`)
+  - 픽업 마감 시간 표시
+  - 상품 클릭 시 `/buyer/product/[id]` 경로로 이동 (Link)
+  - Mobile-First 디자인 (세로 카드 레이아웃)
+- [x] **메인 피드 페이지 구현:**
+  - `app/buyer/page.tsx`: Server Component로 구현
+  - URL 쿼리 파라미터에서 필터 옵션 읽기 (`searchParams`)
+  - 필터에 따른 상품 조회 (`getAvailableProducts()`)
+  - 필터 탭 + 상품 리스트 그리드 렌더링
+  - 빈 상태 처리 (상품이 없을 때 안내 문구)
+  - 로딩 상태 처리 (Suspense 사용 고려)
+- [x] **빈 상태 컴포넌트 구현:**
+  - `components/product/empty-feed.tsx`: 피드 빈 상태 컴포넌트
+  - 등록된 상품이 없을 때 안내 문구 표시
+  - "지금 등록된 상품이 없습니다" 메시지
 
 ### 3-3. 예약 시스템 (Reservation)
 

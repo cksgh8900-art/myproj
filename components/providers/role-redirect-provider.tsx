@@ -28,31 +28,35 @@ export function RoleRedirectProvider({ children }: { children: React.ReactNode }
     console.log("user:", user ? user.id : null);
     console.log("pathname:", pathname);
 
-    // 로딩 중이거나 사용자가 없으면 무시
-    if (!isLoaded) {
-      console.log("⏳ 로딩 중...");
-      console.groupEnd();
-      return;
-    }
-
-    if (!user) {
-      console.log("👤 로그인되지 않은 사용자");
-      console.groupEnd();
-      return;
-    }
-
     // 리다이렉트 제외 경로
     const excludedPaths = [
       "/onboarding",
       "/sign-in",
       "/sign-up",
       "/api/",
+      "/buyer", // 학생 페이지는 로그인 없이 접근 가능
     ];
 
     const isExcludedPath = excludedPaths.some((path) => pathname.startsWith(path));
     if (isExcludedPath) {
       console.log("🚫 리다이렉트 제외 경로:", pathname);
       console.groupEnd();
+      return;
+    }
+
+    // 로딩 중이면 무시
+    if (!isLoaded) {
+      console.log("⏳ 로딩 중...");
+      console.groupEnd();
+      return;
+    }
+
+    // 로그인하지 않은 사용자도 onboarding으로 리다이렉트
+    if (!user) {
+      console.log("👤 로그인되지 않은 사용자 -> /onboarding 으로 리다이렉트");
+      console.groupEnd();
+      hasRedirected.current = true;
+      window.location.href = "/onboarding";
       return;
     }
 
